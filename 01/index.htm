@@ -1,0 +1,41 @@
+<script src="vec2.js"></script>
+<script>
+
+window.addEventListener("load", function() {
+	var instructions = input.split(", ").map(function(i) {
+			return { d: i[0], l: i.substring(1) };
+		}),
+		pos = vec2(),
+		dir = vec2(0, 1),
+		turn = function(d) {
+			if (d == "R") {
+				dir = vec2(dir.y, -dir.x);
+			} else if (d == "L") {
+				dir = vec2(-dir.y, dir.x);
+			}
+		},
+		move = function(l) {
+			for (var i = 0; i < l; i++) {
+				let hash = vec2.toString(pos);
+				if (visited[hash]) {
+					console.log("Location visited twice: %O\nDistance: %i", pos, taxi(pos));
+				} else {
+					visited[hash] = 1;
+				}
+				pos = vec2.add(pos, dir);
+			}
+		},
+		taxi = function(p) {
+			return Math.abs(p.x) + Math.abs(p.y);
+		},
+		visited = {};
+	for (var i = 0, length = instructions.length; i < length; i++) {
+		turn(instructions[i].d);
+		move(instructions[i].l);
+	}
+	console.log("Final position: %O\nDistance: %i", pos, taxi(pos));
+}, false);
+
+var input = "R4, R5, L5, L5, L3, R2, R1, R1, L5, R5, R2, L1, L3, L4, R3, L1, L1, R2, R3, R3, R1, L3, L5, R3, R1, L1, R1, R2, L1, L4, L5, R4, R2, L192, R5, L2, R53, R1, L5, R73, R5, L5, R186, L3, L2, R1, R3, L3, L3, R1, L4, L2, R3, L5, R4, R3, R1, L1, R5, R2, R1, R1, R1, R3, R2, L1, R5, R1, L5, R2, L2, L4, R3, L1, R4, L5, R4, R3, L5, L3, R4, R2, L5, L5, R2, R3, R5, R4, R2, R1, L1, L5, L2, L3, L4, L5, L4, L5, L1, R3, R4, R5, R3, L5, L4, L3, L1, L4, R2, R5, R5, R4, L2, L4, R3, R1, L2, R5, L5, R1, R1, L1, L5, L5, L2, L1, R5, R2, L4, L1, R4, R3, L3, R1, R5, L1, L4, R2, L3, R5, R3, R1, L3";
+
+</script>
