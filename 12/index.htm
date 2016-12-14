@@ -1,0 +1,73 @@
+<script>
+
+var cpu = { ip: 0, a: 0, b: 0, c: 1, d: 0 },
+	instructionSet = {
+		"cpy": function(x, y) {
+			cpu[y] = parseInt(("abcd".split("").indexOf(x) > -1) ? cpu[x] : x);
+			cpu.ip++;
+		},
+		"inc": function(x) { cpu[x]++; cpu.ip++; },
+		"dec": function(x) { cpu[x]--; cpu.ip++; },
+		"jnz": function(x, y) {
+			if (parseInt(("abcd".split("").indexOf(x) > -1) ? cpu[x] : x) != 0) {
+				cpu.ip += parseInt(y);
+			} else {
+				cpu.ip++;
+			}
+		}
+	};
+
+function tokenize(s) {
+	var parts = s.split(/[\s,]+/);
+	return { instruction: parts.shift(), operands: parts };
+}
+
+window.addEventListener("load", function() {
+	var instructions = input.map(tokenize),
+		max = 100000000;
+	while (cpu.ip >= 0 && cpu.ip < instructions.length) {
+		if (max-- <= 0) {
+			console.log("Program terminated");
+			break;
+		}
+		instructionSet[instructions[cpu.ip].instruction].apply(null, instructions[cpu.ip].operands);
+	}
+	console.log(cpu);
+}, false);
+
+var testInput = [
+	"cpy 41 a",
+	"inc a",
+	"inc a",
+	"dec a",
+	"jnz a 2",
+	"dec a"
+];
+
+var input = [
+	"cpy 1 a",
+	"cpy 1 b",
+	"cpy 26 d",
+	"jnz c 2",
+	"jnz 1 5",
+	"cpy 7 c",
+	"inc d",
+	"dec c",
+	"jnz c -2",
+	"cpy a c",
+	"inc a",
+	"dec b",
+	"jnz b -2",
+	"cpy c b",
+	"dec d",
+	"jnz d -6",
+	"cpy 18 c",
+	"cpy 11 d",
+	"inc a",
+	"dec d",
+	"jnz d -2",
+	"dec c",
+	"jnz c -5"
+];
+
+</script>

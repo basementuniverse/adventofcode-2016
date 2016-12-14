@@ -1,0 +1,191 @@
+<script>
+
+// WARNING:
+// while this script would (probably) find the solution eventually, it runs out of memory at about
+// depth ~30, so probably best not to run it for part 1 or part 2 initial states
+
+var testState = {
+		currentFloor: 0,
+		floors: [
+			["hm", "lm"],
+			["hg"],
+			["lg"],
+			[]
+		]
+	},
+	part1State = {
+		currentFloor: 0,
+		floors: [
+			["sg", "sm", "pg", "pm"],
+			["tg", "rg", "rm", "cg", "cm"],
+			["tm"],
+			[]
+		]
+	},
+	part2State = {
+		currentFloor: 0,
+		floors: [
+			["sg", "sm", "pg", "pm", "eg", "em", "dg", "dm"],
+			["tg", "rg", "rm", "cg", "cm"],
+			["tm"],
+			[]
+		]
+	};
+
+function go(initialState) {
+	var allItems = Array.prototype.concat.apply([], initialState.floors),
+		prevStates = {};
+	
+	// solve with bfs
+	var start = new Date();
+	function solve(states, depth) {
+		var validMoves = [];
+		for (let i = 0, length = states.length; i < length; i++) {
+			prevStates[hash(states[i])] = 1;
+		}
+		for (let i = 0, length = states.length; i < length; i++) {
+			if (finished(states[i])) {
+				console.log("Solved in %i moves.", depth);
+				return;
+			} else {
+				Array.prototype.push.apply(validMoves, moves(states[i]));
+			}
+		}
+		console.log("Level %i, %i possible moves.", depth + 1, validMoves.length);
+		solve(validMoves, depth + 1);
+	}
+	solve([initialState], 0);
+	console.log("Time: %f seconds", (new Date() - start) / 1000);
+	
+	// get a list of valid moves available for the current state
+	function moves(state) {
+		var validMoves = [];
+		if (state.currentFloor < 3) { combinations(validMoves, 1, state); }
+		if (state.currentFloor > 0) { combinations(validMoves, -1, state); }
+		return validMoves;
+	}
+	
+	// get all combinations of 1 or 2 items
+	function combinations(validMoves, dir, state) {
+		var got1Generator = false,	// only include 1 move of each type
+			got1Chip = false,
+			got2LinkedItems = false,
+			got2Generators = false,
+			got2Chips = false;
+		
+		// 2 items
+		for (let i = 0, length = state.floors[state.currentFloor].length; i < length; i++) {
+			for (let j = i + 1; j < length; j++) {
+				let item1 = state.floors[state.currentFloor][i],
+					item2 = state.floors[state.currentFloor][j];
+				if (item1[1] == "g" && item2[1] == "g" && got2Generators) { continue; }
+				if (item1[1] == "m" && item2[1] == "m" && got2Chips) { continue; }
+				if (
+					item1[1] == "g" &&
+					item2[1] == "m" &&
+					item1[0] == item2[0] &&
+					got2LinkedItems
+				) {
+					continue;
+				}
+				let newState = permute(state, {
+					oldFloor: state.currentFloor,
+					newFloor: state.currentFloor + dir,
+					items: [item1, item2]
+				});
+				if (valid(newState)) {
+					if (item1[1] == "g" && item2[1] == "g") { got2Generators = true; }
+					if (item1[1] == "m" && item2[1] == "m") { got2Chips = true; }
+					if (item1[1] == "g" && item2[1] == "m" && item1[0] == item2[0]) {
+						got2LinkedItems = true;
+					}
+					validMoves.push(newState);
+				}
+			}
+		}
+		
+		// 1 item
+		for (let i = 0, length = state.floors[state.currentFloor].length; i < length; i++) {
+			let item = state.floors[state.currentFloor][i];
+			if (item[1] == "g" && got1Generator) { continue; }
+			if (item[1] == "m" && got1Chip) { continue; }
+			let newState = permute(state, {
+				oldFloor: state.currentFloor,
+				newFloor: state.currentFloor + dir,
+				items: [item]
+			});
+			if (valid(newState)) {
+				if (item[1] == "g") { got1Generator = true; }
+				if (item[1] == "m") { got1Chip = true; }
+				validMoves.push(newState);
+			}
+		}
+	}
+	
+	// generate a hash string for a state
+	function hash(state) {
+		/*
+		var floors = state.floors.map(i => i.concat().sort());
+		return "" + state.currentFloor + floors.map(i => i.reduce((j, k) => j + "" + k, ""));
+		*/
+		return "" + state.currentFloor + state.floors.map(function(f) {
+			var t = 0;
+			for (var i = f.length; i--;) {
+				switch (f[i][1]) {
+					case "m": t += 1; break;
+					case "g": t += 10; break;
+					default: break;
+				}
+			}
+			return "" + t;
+		});
+	}
+	
+	// apply a move and generate a new state
+	function permute(state, move) {
+		var newState = {
+			floors: state.floors.map(i => i.concat()),
+			currentFloor: move.newFloor
+		};
+		newState.floors[move.oldFloor] = newState.floors[move.oldFloor].filter(
+			i => move.items.indexOf(i) == -1
+		);
+		newState.floors[move.newFloor] = newState.floors[move.newFloor].concat(move.items);
+		return newState;
+	}
+	
+	// return true if the state is valid
+	function valid(state) {
+		if (prevStates[hash(state)]) {	// check if the state has already existed before
+			return false;
+		}
+		for (let i = state.floors.length; i--;) {
+			let generators = state.floors[i].filter(k => k[1] == "g");
+			for (let j = state.floors[i].length; j--;) {
+				if (state.floors[i][j][1] == "g") { continue; }
+				if (
+					generators.indexOf(state.floors[i][j][0] + "g") == -1 &&
+					generators.length > 0
+				) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+	
+	// return true if all chips and generators are on the top floor
+	function finished(state) {
+		for (let i = allItems.length; i--;) {
+			if (state.floors[3].indexOf(allItems[i]) == -1) {
+				return false;
+			}
+		}
+		return true;
+	}
+}
+
+</script>
+<a href="javascript:go(testState)">Test</a> |
+<a href="javascript:go(part1State)">Part 1</a> |
+<a href="javascript:go(part2State)">Part 2</a>

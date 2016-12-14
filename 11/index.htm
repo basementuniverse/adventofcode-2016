@@ -1,0 +1,25 @@
+<script>
+
+// solve.htm runs out of memory before finding the solution, despite optimisations. Perhaps if I
+// wasn't using Javascript...
+// this solution is based on the observation by reddit user /u/bovard:
+// to move n items up 1 floor, it takes 2 * (n - 1) - 1 moves
+
+window.addEventListener("load", function() {
+	var part1State = [4, 5, 1, 0],
+		part2State = [8, 5, 1, 0];
+	
+	function countMoves(state) {
+		var moves = 0,
+			n = 0;
+		for (var i = 0; i < 3; i++) {
+			n += state[i];
+			moves += 2 * (n - 1) - 1;
+		}
+		return moves;
+	}
+	
+	console.log("Part 1: %i\nPart 2: %i", countMoves(part1State), countMoves(part2State));
+}, false);
+
+</script>
