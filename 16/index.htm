@@ -1,0 +1,39 @@
+<script>
+
+var input = "01111010110010011";
+
+window.addEventListener("load", function() {
+	var disk = 35651584;//272;
+	
+	function reverse(s) {
+		return s.split("").reverse().join("");
+	}
+	
+	function invert(s) {
+		return s.split("").map(c => c == "1" ? "0" : "1").join("");
+	}
+	
+	function generateData(s) {
+		return s + "0" + invert(reverse(s));
+	}
+	
+	function checksum(s) {
+		var result = s;
+		do {
+			let c = "";
+			for (var i = 0; i < result.length; i += 2) {
+				c += result[i] == result[i + 1] ? "1" : "0";
+			}
+			result = c;
+		} while (result.length && result.length % 2 == 0);
+		return result;
+	}
+	
+	var data = input;
+	while (data.length < disk) {
+		data = generateData(data);
+	}
+	console.log(checksum(data.substr(0, disk)));
+}, false);
+
+</script>
