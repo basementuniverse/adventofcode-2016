@@ -15,3 +15,5 @@ Day 5 solution uses [md5.js](http://www.myersdaily.org/joseph/javascript/md5-tex
 Day 11 solution <code>solve.htm</code> runs out of memory before reaching the solution. The solution I used is based on an observation by reddit user [/u/bovard](https://www.reddit.com/user/bovard).
 
 Day 14 solution uses [md5.js](http://www.myersdaily.org/joseph/javascript/md5-text.html) by Joseph Myers.
+
+Day 17 solution uses [md5.js](http://www.myersdaily.org/joseph/javascript/md5-text.html) by Joseph Myers.
