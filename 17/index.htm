@@ -1,0 +1,46 @@
+<script src="md5.js"></script>
+<script>
+
+var input = "vkjiggvb";
+
+window.addEventListener("load", function() {
+	var door = c => "bcdef".indexOf(c) > -1;
+	
+	function moves(x, y, p) {
+		var m = [],
+			h = md5(input + p);
+		if (y > 0 && door(h[0])) { m.push({ x: x, y: y - 1, p: p + "U" }); }
+		if (y < 3 && door(h[1])) { m.push({ x: x, y: y + 1, p: p + "D" }); }
+		if (x > 0 && door(h[2])) { m.push({ x: x - 1, y: y, p: p + "L" }); }
+		if (x < 3 && door(h[3])) { m.push({ x: x + 1, y: y, p: p + "R" }); }
+		return m;
+	}
+	
+	function solve() {
+		var q = [{ x: 0, y: 0, p: "" }],
+			distances = { "": 0 },
+			shortestPath = null,
+			longestPathLength = 0;
+		while (q.length) {
+			let c = q.shift(),
+				m = moves(c.x, c.y, c.p);
+			for (let i = m.length; i--;) {
+				if (m[i].x == 3 && m[i].y == 3) {
+					if (longestPathLength == 0) {
+						shortestPath = m[i].p;
+					}
+					longestPathLength = m[i].p.length;
+					continue;
+				}
+				if (distances[m[i].p] === undefined) {
+					distances[m[i].p] = c.p.length;
+					q.push(m[i]);
+				}
+			}
+		}
+		return { shortestPath: shortestPath, longestPathLength: longestPathLength };
+	}
+	console.log(solve());
+}, false);
+
+</script>
