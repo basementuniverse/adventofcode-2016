@@ -1,0 +1,37 @@
+<script>
+
+var input = "^.^^^..^^...^.^..^^^^^.....^...^^^..^^^^.^^.^^^^^^^^.^^.^^^^...^^...^^^^.^.^..^^..^..^.^^.^.^.......";
+
+window.addEventListener("load", function() {
+	function row(previous) {
+		var current = "";
+		for (let i = 0; i < previous.length; i++) {
+			let left = i == 0 ? "." : previous[i - 1],
+				center = previous[i],
+				right = i == previous.length - 1 ? "." : previous[i + 1];
+			if (
+				(left == "^" && center == "^" && right == ".") ||
+				(left == "." && center == "^" && right == "^") ||
+				(left == "^" && center == "." && right == ".") ||
+				(left == "." && center == "." && right == "^")
+			) {
+				current += "^";
+			} else {
+				current += ".";
+			}
+		}
+		return current;
+	}
+	var countRows = 40,//400000,
+		rows = [input],
+		safe = s => s.split("").filter(c => c == ".").length,
+		total = safe(input);
+	for (var i = 1; i < countRows; i++) {
+		let r = row(rows[i - 1]);
+		rows.push(r);
+		total += safe(r);
+	}
+	console.log("Tiles:\n%O\nSafe tiles: %i", rows, total);
+}, false);
+
+</script>
