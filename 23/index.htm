@@ -1,0 +1,126 @@
+<script>
+
+var cpu = { ip: 0, a: 7, b: 0, c: 1, d: 0 },
+	reg = x => "abcd".split("").indexOf(x) > -1,
+	val = x => parseInt(reg(x) ? cpu[x] : x),
+	instructions = [],
+	instructionSet = {
+		"cpy": function(x, y) {
+			if (!reg(y)) { return; }
+			cpu[y] = val(x);
+			cpu.ip++;
+		},
+		"inc": function(x) {
+			if (!reg(x)) { return; }
+			cpu[x]++;
+			cpu.ip++;
+		},
+		"dec": function(x) {
+			if (!reg(x)) { return; }
+			cpu[x]--;
+			cpu.ip++;
+		},
+		"jnz": function(x, y) {
+			x = val(x);
+			y = val(y);
+			if (x != 0) {
+				cpu.ip += y;
+			} else {
+				cpu.ip++;
+			}
+		},
+		"tgl": function(x) {
+			var target = cpu.ip + val(x);
+			if (target >= 0 && target < instructions.length) {
+				switch (instructions[target].instruction) {
+					case "cpy":
+						instructions[target].instruction = "jnz"; break;
+					case "jnz":
+						instructions[target].instruction = "cpy"; break;
+					case "inc":
+						instructions[target].instruction = "dec"; break;
+					default:
+						instructions[target].instruction = "inc"; break;
+				}
+			}
+			cpu.ip++;
+		}
+	};
+
+function tokenize(s) {
+	var parts = s.split(/[\s,]+/);
+	return { instruction: parts.shift(), operands: parts };
+}
+
+window.addEventListener("load", function() {
+	var max = 10000000;
+	instructions = input.map(tokenize);
+	while (cpu.ip >= 0 && cpu.ip < instructions.length) {
+		if (max-- <= 0) {
+			console.log("Program terminated");
+			break;
+		}
+		/*console.log(
+			"%i: %s (%s) A %i, B: %i, C: %i, D: %i",
+			cpu.ip,
+			instructions[cpu.ip].instruction,
+			instructions[cpu.ip].operands.join(" "),
+			cpu.a, cpu.b, cpu.c, cpu.d
+		);*/
+		instructionSet[instructions[cpu.ip].instruction].apply(null, instructions[cpu.ip].operands);
+	}
+	
+	// Part 1
+	console.log("Part 1: %i", cpu.a);
+	
+	// Part 2 solved manually
+	function fact(n) {
+		var r = 1;
+		for (var i = 2; i <= n; i++) {
+			r *= i;
+		}
+		return r;
+	}
+	console.log("Part 2: %i", fact(12) + (78 * 70));
+}, false);
+
+var testInput = [
+	"cpy 2 a",
+	"tgl a",
+	"tgl a",
+	"tgl a",
+	"cpy 1 a",
+	"dec a",
+	"dec a"
+];
+
+var input = [
+	"cpy a b",
+	"dec b",
+	"cpy a d",
+	"cpy 0 a",
+	"cpy b c",
+	"inc a",
+	"dec c",
+	"jnz c -2",
+	"dec d",
+	"jnz d -5",
+	"dec b",
+	"cpy b c",
+	"cpy c d",
+	"dec d",
+	"inc c",
+	"jnz d -2",
+	"tgl c",
+	"cpy -16 c",
+	"jnz 1 c",
+	"cpy 78 c",
+	"jnz 70 d",
+	"inc a",
+	"inc d",
+	"jnz d -2",
+	"inc c",
+	"jnz c -5"
+];
+
+</script>
